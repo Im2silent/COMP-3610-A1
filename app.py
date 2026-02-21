@@ -11,10 +11,17 @@ st.title('NYC Taxi Trip Dashboard')
 @st.cache_data 
 def load_data():
     try:
-        df = pl.read_parquet('data/cleaned_trips.parquet')
+        # First try the local copy in the dashboard folder
+        df = pl.read_parquet('taxi_data.parquet')
     except FileNotFoundError:
-         st.error("Can't find the dataset! Make sure 'taxi_data.parquet' is in the dashboard folder.")
-         st.stop()
+        try:
+            # Maybe it's in the parent directory?
+            df = pl.read_parquet('../yellow_tripdata_2024-01.parquet')
+        except FileNotFoundError:
+            # Okay, we're stuck - let the user know what's up
+            st.error("Can't find the dataset! Make sure 'taxi_data.parquet' is in the dashboard folder.")
+            st.stop()
+            
     df = df.sample(n=min(100000, len(df)), seed=42)
     return df 
 
