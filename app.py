@@ -11,7 +11,7 @@ st.title('NYC Taxi Trip Dashboard')
 @st.cache_data 
 def load_data():
      df = pl.read_parquet('data/cleaned_trips.parquet') 
-     return df.sample(n=100000, random_state=42) 
+     return df.sample(n=min(100000, len(df)), random_state=42) 
 
 zones_df = pl.read_csv('data/taxi_zone_lookup.csv')
 df = load_data()
