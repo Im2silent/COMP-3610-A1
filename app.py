@@ -84,6 +84,30 @@ df, zones_df = load_data()
 
 st.write("This dashboard explores travel patterns, fares, and payment behavior in NYC taxi trips.")
 
+df = df.with_columns(
+    ((pl.col("tpep_dropoff_datetime") - pl.col("tpep_pickup_datetime"))
+     .dt.total_seconds() / 60)
+    .alias("trip_duration_minutes")
+)
+
+print("trip_duration_minutes created.")
+
+df = df.with_columns([
+
+    pl.when(pl.col("trip_duration_minutes") > 0)
+      .then(pl.col("trip_distance") / (pl.col("trip_duration_minutes") / 60))
+      .otherwise(0)
+      .alias("trip_speed_mph"),
+
+    pl.col("tpep_pickup_datetime").dt.hour().alias("pickup_hour"),
+
+    pl.col("tpep_pickup_datetime").dt.strftime("%A").alias("pickup_day_of_week")
+])
+
+print("trip_speed_mph created.")
+print("pickup_hour created.")
+print("pickup_day_of_week created.")
+
 # ---------------- FILTERS ----------------
 st.sidebar.header("Filters")
 
@@ -116,7 +140,7 @@ col1.metric("Total Trips", filtered_df.height)
 col2.metric("Avg Fare ($)", round(filtered_df["fare_amount"].mean(), 2))
 col3.metric("Total Revenue ($)", round(filtered_df["total_amount"].sum(), 2))
 col4.metric("Avg Distance (mi)", round(filtered_df["trip_distance"].mean(), 2))
-col5.metric("Avg Duration (min)", round(filtered_df["trip_duration_min"].mean(), 2))
+col5.metric("Avg Duration (min)", round(filtered_df["trip_duration_minutes"].mean(), 2))
 
 # ---------------- VISUALS ----------------
 st.subheader("Visualizations")
