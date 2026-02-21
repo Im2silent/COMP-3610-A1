@@ -74,7 +74,6 @@ def load_data():
             (pl.col("trip_distance") > 0) & (pl.col("trip_distance") < 50) &
             (pl.col("trip_duration_min") > 1) & (pl.col("trip_duration_min") < 180)
         )
-        .filter(pl.rand(seed=42) < 0.02)  # seeded randomness
         .head(100_000)
         .collect()
     )
