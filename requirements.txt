@@ -1,0 +1,4 @@
+plotly==6.5.2
+polars==1.38.1
+streamlit==1.54.0
+
