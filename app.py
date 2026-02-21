@@ -23,14 +23,13 @@ def download_file(url, dest):
     f.write(response.content)
   print("file downloaded")
 
-download_file(tripData,tripDataPath)
 download_file(zoneLookup, zoneLookupPath)
 
 @st.cache_data 
 def load_data():
     try:
         # First try the local copy in the dashboard folder
-        lf = pl.scan_parquet('yellow_tripdata_2024-01.parquet')
+        lf = pl.scan_parquet('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet')
     except FileNotFoundError:
         try:
             # Maybe it's in the parent directory?
