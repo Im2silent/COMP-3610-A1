@@ -50,8 +50,6 @@ The project is implemented using **Polars**, **DuckDB**, and **Streamlit**, with
 
 ⚠️ **Note:**  
 The raw dataset is **not included** in this repository.  
-Only the processed dataset is stored to support analysis and dashboard functionality.
-
 ---
 
 ## 📊 Analysis & Visualizations
