@@ -8,25 +8,80 @@ st.set_page_config( page_title='NYC Taxi Dashboard', page_icon='taxi', layout='w
 
 st.title('NYC Taxi Trip Dashboard')
 
+import requests
+
+tripData = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
+zoneLookup = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
+
+tripDataPath = "yellow_tripdata_2024-01.parquet"
+zoneLookupPath = "taxi_zone_lookup.csv"
+
+def download_file(url, dest):
+  response = requests.get(url)
+  response.raise_for_status()
+  with open(dest, "wb") as f:
+    f.write(response.content)
+  print("file downloaded")
+
+download_file(tripData,tripDataPath)
+download_file(zoneLookup, zoneLookupPath)
+
 @st.cache_data 
 def load_data():
     try:
         # First try the local copy in the dashboard folder
-        df = pl.read_parquet('taxi_data.parquet')
+        lf = pl.read_parquet('yellow_tripdata_2024-01.parquet')
     except FileNotFoundError:
         try:
             # Maybe it's in the parent directory?
-            df = pl.read_parquet('../yellow_tripdata_2024-01.parquet')
+            lf = pl.read_parquet('../yellow_tripdata_2024-01.parquet')
         except FileNotFoundError:
             # Okay, we're stuck - let the user know what's up
             st.error("Can't find the dataset! Make sure 'taxi_data.parquet' is in the dashboard folder.")
             st.stop()
+    
+    try:
+        # First try the local copy in the dashboard folder
+        zones_df = pl.read_csv('taxi_zone_lookup.csv')
+    except FileNotFoundError:
+        try:
+            # Maybe it's in the parent directory?
+            zones_df = pl.read_csv('../data/taxi_zone_lookup.csv')
+        except FileNotFoundError:
+            # Okay, we're stuck - let the user know what's up
+            st.error("Can't find the dataset! Make sure 'taxi_zone_lookup.csv' is in the dashboard folder.")
+            st.stop()
             
-    df = df.sample(n=min(100000, len(df)), seed=42)
-    return df 
+    df = (
+        lf
+        .with_columns([
+            pl.col("tpep_pickup_datetime").dt.hour().alias("pickup_hour"),
+            pl.col("tpep_pickup_datetime").dt.weekday().alias("pickup_weekday"),
+            pl.col("tpep_pickup_datetime").dt.date().alias("pickup_date"),
 
-zones_df = pl.read_csv('data/taxi_zone_lookup.csv')
-df = load_data()
+            (
+                (pl.col("tpep_dropoff_datetime") - pl.col("tpep_pickup_datetime"))
+                .dt.total_seconds() / 60
+            ).alias("trip_duration_min"),
+
+            (
+                pl.when(pl.col("fare_amount") > 0)
+                .then(pl.col("tip_amount") / pl.col("fare_amount") * 100)
+                .otherwise(0)
+            ).alias("tip_pct"),
+        ])
+        .filter(
+            (pl.col("fare_amount") > 0) & (pl.col("fare_amount") < 200) &
+            (pl.col("trip_distance") > 0) & (pl.col("trip_distance") < 50) &
+            (pl.col("trip_duration_min") > 1) & (pl.col("trip_duration_min") < 180)
+        )
+        .sample(n=100_000, seed=42)
+        .collect()
+    )
+
+    return df, zones_df
+    
+df, zones_df = load_data()
 
 st.write("This dashboard explores travel patterns, fares, and payment behavior in NYC taxi trips.")
 

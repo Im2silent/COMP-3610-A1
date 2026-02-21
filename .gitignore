@@ -1,1 +1,3 @@
 data/
+yellow_tripdata_2024-01.parquet
+taxi_zone_lookup.csv
