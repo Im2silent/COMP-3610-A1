@@ -21,7 +21,6 @@ def load_data():
 zones_df = pl.read_csv('data/taxi_zone_lookup.csv')
 df = load_data()
 
-st.title("NYC Yellow Taxi Trip Analysis")
 st.write("This dashboard explores travel patterns, fares, and payment behavior in NYC taxi trips.")
 
 # ---------------- FILTERS ----------------
@@ -65,7 +64,7 @@ st.subheader("Visualizations")
 
 top_pickups = (
     df
-    .groupby("PULocationID")
+    .group_by("PULocationID")
     .agg(pl.count().alias("trip_count")) 
     .sort("trip_count", descending=True)
     .head(10)
@@ -84,12 +83,11 @@ ax.set_title("Top 10 Pickup Zones by Trip Count")
 ax.invert_yaxis()  
 
 st.pyplot(fig)
-st.write("The busiest pickup zones are concentrated in high-traffic Manhattan areas.")
 
 # 2. LineChart: Avg fare by hour
 avg_fare_by_hour = (
     df
-    .groupby("pickup_hour")             
+    .group_by("pickup_hour")             
     .agg(pl.col("fare_amount").mean().alias("avg_fare"))
     .sort("pickup_hour")
 )
@@ -129,7 +127,7 @@ st.write("Most trips are short-distance, with a long tail of longer journeys.")
 # 4. Barchart: Payment type breakdown
 payment_counts = (
     df
-    .groupby("payment_type")  
+    .group_by("payment_type")  
     .agg(pl.count().alias("count"))  
     .sort("payment_type")
 )
@@ -150,7 +148,7 @@ st.pyplot(fig)
 # 5. Heatmap: Trips by day of week and hour
 heatmap_df = (
     df
-    .groupby(["pickup_day_of_week", "pickup_hour"])
+    .group_by(["pickup_day_of_week", "pickup_hour"])
     .agg(pl.count().alias("trip_count"))
     .sort(["pickup_day_of_week", "pickup_hour"])
 )
