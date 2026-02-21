@@ -15,7 +15,7 @@ def load_data():
     except FileNotFoundError:
          st.error("Can't find the dataset! Make sure 'taxi_data.parquet' is in the dashboard folder.")
          st.stop()
-    df = df.sample(n=min(100000, len(df)), random_state=42)
+    df = df.sample(n=min(100000, len(df)), seed=42)
     return df 
 
 zones_df = pl.read_csv('data/taxi_zone_lookup.csv')
