@@ -30,11 +30,11 @@ download_file(zoneLookup, zoneLookupPath)
 def load_data():
     try:
         # First try the local copy in the dashboard folder
-        lf = pl.read_parquet('yellow_tripdata_2024-01.parquet')
+        lf = pl.scan_parquet('yellow_tripdata_2024-01.parquet')
     except FileNotFoundError:
         try:
             # Maybe it's in the parent directory?
-            lf = pl.read_parquet('../yellow_tripdata_2024-01.parquet')
+            lf = pl.scan_parquet('../yellow_tripdata_2024-01.parquet')
         except FileNotFoundError:
             # Okay, we're stuck - let the user know what's up
             st.error("Can't find the dataset! Make sure 'taxi_data.parquet' is in the dashboard folder.")
