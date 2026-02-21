@@ -116,7 +116,7 @@ col1.metric("Total Trips", filtered_df.height)
 col2.metric("Avg Fare ($)", round(filtered_df["fare_amount"].mean(), 2))
 col3.metric("Total Revenue ($)", round(filtered_df["total_amount"].sum(), 2))
 col4.metric("Avg Distance (mi)", round(filtered_df["trip_distance"].mean(), 2))
-col5.metric("Avg Duration (min)", round(filtered_df["trip_duration_minutes"].mean(), 2))
+col5.metric("Avg Duration (min)", round(filtered_df["trip_duration_min"].mean(), 2))
 
 # ---------------- VISUALS ----------------
 st.subheader("Visualizations")
